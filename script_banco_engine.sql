@@ -540,6 +540,31 @@ ADD CONSTRAINT `orgaos_publicos_ibfk_3`
   ON UPDATE CASCADE;
 
 
+  CREATE TABLE IF NOT EXISTS vint_crm2.grupo (
+  id               INT NOT NULL AUTO_INCREMENT,
+  oportunidade_id  INT NOT NULL,
+  nome             VARCHAR(80)  NOT NULL,
+  descricao        VARCHAR(400) NULL,
+  PRIMARY KEY (id),
+  INDEX idx_grupo_oportunidade (oportunidade_id),
+  CONSTRAINT fk_grupo_oportunidade
+    FOREIGN KEY (oportunidade_id)
+    REFERENCES vint_crm2.oportunidades (id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+ALTER TABLE vint_crm2.lotes
+  ADD COLUMN grupo_id INT NULL AFTER descricao,
+  ADD INDEX idx_lotes_grupo (grupo_id),
+  ADD CONSTRAINT fk_lotes_grupo
+    FOREIGN KEY (grupo_id)
+    REFERENCES vint_crm2.grupo (id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
