@@ -16,41 +16,23 @@ import jwt from 'jsonwebtoken';
 
 
 
-route.post('/entrar', (req, res, next) => {
-    mysql.getConnection((error, conn) => {
-        if (error) { return res.status(500).send({ error: error }) }
-        const query = `SELECT * FROM proprietario WHERE email = ?`
-        conn.query(query, [req.body.email], (error, results, fields) => {
-            conn.release();
-            if (error) { return res.status(500).send({ error: error }) }
-            if (results.length < 1) {
-
-                return res.status(401).send({ mensagem: 'Falha na autenticação 1' })
-            }
-
-            if (req.body.google) {
-
-                let token = jwt.sign({
-                    id_proprietario: results[0].id_proprietario,
-                    Nome: results[0].nome,
-                    email: results[0].email,
-                    Cpf: results[0].cpf,
-                    telefone: results[0].telefone
-
-                }, process.env.JWT_KEY,
-                    {
-                        expiresIn: "1h"
-                    });
-                return res.status(200).send({
-                    mensagem: 'Autenticado com sucesso',
-                    usuario: results,
-                    token: token
-                });
+route.post('/entrar',async (req, res, next) => {
 
 
 
-            } else {
-                bcrypt.compare(req.body.senha, results[0].senha, (err, result) => {
+    try {
+
+        console.log('pelo menos entrou', req.body)
+        const queryEmail = 'SELECT * FROM usuarios WHERE email = ?';
+
+        const results = await execute(queryEmail, [req.body.email]);
+
+        console.log(results)
+        if (results.length < 1) {
+            return res.status(409).send({ Mensagem: 'Não existe este email cadastrado' })
+        }
+     
+                bcrypt.compare(req.body.senha_acesso, results[0].senha_acesso, (err, result) => {
                     if (err) {
 
                         return res.status(401).send({ mensagem: 'Falha na autenticação 2' })
@@ -76,11 +58,15 @@ route.post('/entrar', (req, res, next) => {
                     return res.status(401).send({ mensagem: 'Falha na autenticação 3' })
                 });
 
-            }
+            
 
+    } catch (error) {
 
-        });
-    });
+        console.log(error)
+        return res.status(500).send({ error: error })
+        
+    }
+
 })
 
 

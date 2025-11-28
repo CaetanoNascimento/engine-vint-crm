@@ -141,5 +141,3 @@ vite.config.ts.timestamp-*
 
 
 /nodemon.json
-
-/src/mysql.js
